@@ -11,14 +11,7 @@ import base64
 ROBOFLOW_MODEL = "sticky-dot-counter"
 ROBOFLOW_API_KEY = st.secrets["RF_API_KEY"]
 
-upload_url = "".join([
-    "https://detect.roboflow.com/",
-    ROBOFLOW_MODEL,
-    "?access_token=",
-    ROBOFLOW_API_KEY,
-    "&format=image",
-    "&stroke=5"
-])
+upload_url = f"https://detect.roboflow.com/{ROBOFLOW_MODEL}/1?api_key={ROBOFLOW_API_KEY}"
 
 
 img_file_buffer = st.camera_input("Take a picture")
@@ -31,16 +24,15 @@ if img_file_buffer is not None:
     retval, buffer = cv2.imencode('.jpg', cv2_img)
     img_str = base64.b64encode(buffer)
 
-    resp = requests.post(upload_url, data=img_str, headers={
-        "Content-Type": "application/x-www-form-urlencoded"
-    }, stream=True).raw
+    resp = requests.post(
+        upload_url, 
+        data=img_str, 
+        headers={"Content-Type": "application/x-www-form-urlencoded"})
+
+    st.write(resp.json())
 
     st.write(type(cv2_img))
 
-    # Parse result image
-    image = np.asarray(bytearray(resp.read()), dtype="uint8")
-    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-    cv2.imshow('image', image)
  #   st.write(model.predict(img_str, confidence=40, overlap=30).json())
 
     # Check the type of cv2_img:
