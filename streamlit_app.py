@@ -1,12 +1,24 @@
 import streamlit as st
 import cv2
 import numpy as np
-#from roboflow import Roboflow
+import requests
 import base64
 
 #rf = Roboflow(api_key=st.secrets["RF_API_KEY"])
 #project = rf.workspace().project("sticky-dot-counter")
 #model = project.version(1).model
+
+ROBOFLOW_MODEL = "sticky-dot-counter"
+ROBOFLOW_API_KEY = st.secrets["RF_API_KEY"]
+
+upload_url = "".join([
+    "https://detect.roboflow.com/",
+    ROBOFLOW_MODEL,
+    "?access_token=",
+    ROBOFLOW_API_KEY,
+    "&format=image",
+    "&stroke=5"
+])
 
 
 img_file_buffer = st.camera_input("Take a picture")
@@ -19,6 +31,16 @@ if img_file_buffer is not None:
     retval, buffer = cv2.imencode('.jpg', cv2_img)
     img_str = base64.b64encode(buffer)
 
+    resp = requests.post(upload_url, data=img_str, headers={
+        "Content-Type": "application/x-www-form-urlencoded"
+    }, stream=True).raw
+
+    st.write(type(cv2_img))
+
+    # Parse result image
+    image = np.asarray(bytearray(resp.read()), dtype="uint8")
+    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+    cv2.imshow('image', image)
  #   st.write(model.predict(img_str, confidence=40, overlap=30).json())
 
     # Check the type of cv2_img:
