@@ -1,54 +1,24 @@
 import streamlit as st
-#import cv2
+import cv2
 import numpy as np
-import av
-#import mediapipe as mp
-#from streamlit_webrtc import webrtc_streamer, WebRtcMode
-from PIL import Image
-
-
-score_threshold = st.slider("Score threshold", 0.0, 1.0, 0.5, 0.05)
 
 
 
 img_file_buffer = st.camera_input("Take a picture")
 
 if img_file_buffer is not None:
-    # To read image file buffer as a PIL Image:
-    img = Image.open(img_file_buffer)
+    # To read image file buffer with OpenCV:
+    bytes_data = img_file_buffer.getvalue()
+    cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
 
-    # To convert PIL Image to numpy array:
-    img_array = np.array(img)
-
-    # Check the type of img_array:
+    # Check the type of cv2_img:
     # Should output: <class 'numpy.ndarray'>
-    st.write(type(img_array))
+    st.write(type(cv2_img))
 
-    # Check the shape of img_array:
+    # Check the shape of cv2_img:
     # Should output shape: (height, width, channels)
-    st.write(img_array.shape)
+    st.write(cv2_img.shape)
 
-
-#def video_frame_callback(frame: av.VideoFrame) -> av.VideoFrame:
-#    image = frame.to_ndarray(format="bgr24")
-#    h, w = image.shape[:2]
-#    return av.VideoFrame.from_ndarray(image, format="bgr24")
-
-#webrtc_ctx = webrtc_streamer(
-#    key="object-detection",
-#    mode=WebRtcMode.SENDRECV,
-#    rtc_configuration={
-#        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}],
-#        "iceTransportPolicy": "relay",
-#    },
-#    video_frame_callback=video_frame_callback,
-#    media_stream_constraints={"video": True, "audio": False},
-#    async_processing=True,
-#)
-
-#if st.checkbox("Show the detected labels", value=True):
-#    if webrtc_ctx.state.playing:
-#        labels_placeholder = st.empty()
 
 
 st.markdown(
