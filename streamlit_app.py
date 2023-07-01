@@ -19,10 +19,10 @@ def video_frame_callback(frame: av.VideoFrame) -> av.VideoFrame:
 webrtc_ctx = webrtc_streamer(
     key="object-detection",
     mode=WebRtcMode.SENDRECV,
-    #rtc_configuration={
-    #    "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}],
-    #    "iceTransportPolicy": "relay",
-    #},
+    rtc_configuration={
+        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}],
+        "iceTransportPolicy": "relay",
+    },
     video_frame_callback=video_frame_callback,
     media_stream_constraints={"video": True, "audio": False},
     async_processing=True,
