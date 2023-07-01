@@ -1,36 +1,54 @@
 import streamlit as st
 #import cv2
-#import numpy as np
+import numpy as np
 import av
 #import mediapipe as mp
-from streamlit_webrtc import webrtc_streamer, WebRtcMode
-
+#from streamlit_webrtc import webrtc_streamer, WebRtcMode
+from PIL import Image
 
 
 score_threshold = st.slider("Score threshold", 0.0, 1.0, 0.5, 0.05)
 
 
 
-def video_frame_callback(frame: av.VideoFrame) -> av.VideoFrame:
-    image = frame.to_ndarray(format="bgr24")
-    h, w = image.shape[:2]
-    return av.VideoFrame.from_ndarray(image, format="bgr24")
+img_file_buffer = st.camera_input("Take a picture")
 
-webrtc_ctx = webrtc_streamer(
-    key="object-detection",
-    mode=WebRtcMode.SENDRECV,
-    rtc_configuration={
-        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}],
-        "iceTransportPolicy": "relay",
-    },
-    video_frame_callback=video_frame_callback,
-    media_stream_constraints={"video": True, "audio": False},
-    async_processing=True,
-)
+if img_file_buffer is not None:
+    # To read image file buffer as a PIL Image:
+    img = Image.open(img_file_buffer)
 
-if st.checkbox("Show the detected labels", value=True):
-    if webrtc_ctx.state.playing:
-        labels_placeholder = st.empty()
+    # To convert PIL Image to numpy array:
+    img_array = np.array(img)
+
+    # Check the type of img_array:
+    # Should output: <class 'numpy.ndarray'>
+    st.write(type(img_array))
+
+    # Check the shape of img_array:
+    # Should output shape: (height, width, channels)
+    st.write(img_array.shape)
+
+
+#def video_frame_callback(frame: av.VideoFrame) -> av.VideoFrame:
+#    image = frame.to_ndarray(format="bgr24")
+#    h, w = image.shape[:2]
+#    return av.VideoFrame.from_ndarray(image, format="bgr24")
+
+#webrtc_ctx = webrtc_streamer(
+#    key="object-detection",
+#    mode=WebRtcMode.SENDRECV,
+#    rtc_configuration={
+#        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}],
+#        "iceTransportPolicy": "relay",
+#    },
+#    video_frame_callback=video_frame_callback,
+#    media_stream_constraints={"video": True, "audio": False},
+#    async_processing=True,
+#)
+
+#if st.checkbox("Show the detected labels", value=True):
+#    if webrtc_ctx.state.playing:
+#        labels_placeholder = st.empty()
 
 
 st.markdown(
