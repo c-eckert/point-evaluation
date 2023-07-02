@@ -85,24 +85,24 @@ if img_file_buffer is not None:
             save_button_disabled = False
         
         st.write(f"{df.shape[0]} von 20 Punkten erkannt...")
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown(f"""
-            Vers:  
-            Mitarbeit:  
-            Benehmen:  
-            Zimmer:
-            #### Gesamtpunkte:
-            """)
+        #col1, col2 = st.columns(2)
+        #with col1:
+        #    st.markdown(f"""
+        #    Vers:  
+        #    Mitarbeit:  
+        #    Benehmen:  
+        #    Zimmer:
+        #    #### Gesamtpunkte:
+        #    """)
         
-        with col2:
-            st.markdown(f"""
-            &emsp; **{pt_sums["Vers"]}** * 3  
-            &plus;&ensp; **{pt_sums["Mitarbeit"]}** * 3  
-            &plus;&ensp;  **{pt_sums["Benehmen"]}** * 3  
-            &plus;&ensp;  **{pt_sums["Zimmer"]}** * 1
-            #### =&ensp; {pt_ges}
-            """)
+        #with col2:
+        #    st.markdown(f"""
+        #    &emsp; **{pt_sums["Vers"]}** * 3  
+        #    &plus;&ensp; **{pt_sums["Mitarbeit"]}** * 3  
+        #    &plus;&ensp;  **{pt_sums["Benehmen"]}** * 3  
+        #    &plus;&ensp;  **{pt_sums["Zimmer"]}** * 1
+        #    #### =&ensp; {pt_ges}
+        #    """)
         
         st.markdown(f"""
             | Kategorie    | Punkte   |
@@ -126,6 +126,7 @@ if img_file_buffer is not None:
             
         FRAME_WINDOW.image(rgb_img)
 
+st.write("---") 
 
 but_col1, but_col2, but_col3, but_col4 = st.columns(4)
 
