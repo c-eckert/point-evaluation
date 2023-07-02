@@ -69,16 +69,17 @@ if img_file_buffer is not None:
         pt_sums = dict.fromkeys(ROW_NAMES, 0)
         for i, row_name in enumerate(ROW_NAMES):
             df_row = df.iloc[i*5:(i+1)*5]
-            points = df_row["points"].sum()
-            min_x = int(df_row["x"].min() - df_row["w"].min()/2)
-            min_y = int(df_row["y"].min() - df_row["h"].min()/2)
-            max_x = int(df_row["x"].max() + df_row["w"].min()/2)
-            max_y = int(df_row["y"].max() + df_row["h"].min()/2)
+            if not df_row.empty:
+                points = df_row["points"].sum()
+                min_x = int(df_row["x"].min() - df_row["w"].min()/2)
+                min_y = int(df_row["y"].min() - df_row["h"].min()/2)
+                max_x = int(df_row["x"].max() + df_row["w"].min()/2)
+                max_y = int(df_row["y"].max() + df_row["h"].min()/2)
 
-            pt_sums[row_name] = points
+                pt_sums[row_name] = points
 
-            rgb_img = cv2.rectangle(rgb_img, (min_x, min_y), (max_x, max_y), (0, 0, 255), 2)
-            rgb_img = cv2.putText(rgb_img, row_name, (max_x + 5, max_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+                rgb_img = cv2.rectangle(rgb_img, (min_x, min_y), (max_x, max_y), (0, 0, 255), 2)
+                rgb_img = cv2.putText(rgb_img, row_name, (max_x + 5, max_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
 
         pt_ges = pt_sums["Vers"] * 3 + pt_sums["Mitarbeit"] * 3 + pt_sums["Benehmen"] * 3 + pt_sums["Zimmer"]
         if pt_ges:
