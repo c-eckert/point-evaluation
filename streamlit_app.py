@@ -43,8 +43,7 @@ if img_file_buffer is not None:
     if resp.status_code == 200:
         detection = resp.json()
         rgb_img = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2RGB)
-        
-
+        data_x = [i["x"] for i in detection["predictions"]]
         data_y = [i["y"] for i in detection["predictions"]]
         data_class = [CLASS_TO_VALUE[i["class"]] for i in detection["predictions"]]
         d = {"y": data_y, "class": data_class}
