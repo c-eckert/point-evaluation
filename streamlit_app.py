@@ -8,6 +8,9 @@ import pandas as pd
 ROBOFLOW_MODEL = st.secrets["RF_MODEL"]
 ROBOFLOW_API_KEY = st.secrets["RF_API_KEY"]
 
+if 'liste' not in st.session_state:
+    st.session_state.liste = []
+
 upload_url = f"https://detect.roboflow.com/{ROBOFLOW_MODEL}/1?api_key={ROBOFLOW_API_KEY}"
 
 CLASS_TO_COLOR = {
@@ -22,10 +25,14 @@ CLASS_TO_VALUE = {
     "green-dot": 2
 }
 
-img_file_buffer = st.camera_input("Take a picture")
+img_file_buffer = st.camera_input("Take a picture", key="camera")
 
 st.write("Detektion...")
 FRAME_WINDOW = st.image([])
+
+
+
+
 
 if img_file_buffer is not None:
     # To read image file buffer with OpenCV:
@@ -61,13 +68,39 @@ if img_file_buffer is not None:
         }
         df = pd.DataFrame(data=d)
         df = df.sort_values(by=["y"])
-        st.write(f"Anzahl Detektionen {df.shape[0]}")
-        punkte_3fach = df["points"].iloc[:-5].sum()
-        punkte_1fach = df["points"].iloc[-5:].sum()
-        punkte_ges = punkte_3fach*3 + punkte_1fach
-        st.write(f"Punktzahl: {punkte_ges}")
+        pt_vers = df["points"].iloc[:5].sum()
+        pt_mitarbeit = df["points"].iloc[5:10].sum()
+        pt_benehmen = df["points"].iloc[10:15].sum()
+        pt_zimmer = df["points"].iloc[15:20].sum()
+        pt_ges = pt_vers * 3 + pt_mitarbeit * 3 + pt_benehmen * 1
+        
+        st.write(f"{df.shape[0]} von 20 Punkten erkannt...")
+        col1, col2 = st.columns([1, 2])
+        with col1:
+            st.markdown(f"""
+            Vers:  
+            Mitarbeit:  
+            Benehmen:  
+            Zimmer:
+            #### Gesamtpunkte:
+            """)
+        
+        with col2:
+            st.markdown(f"""
+            &emsp; **{pt_vers}** * 3  
+            &plus;&ensp; **{pt_mitarbeit}** * 3  
+            &plus;&ensp;  **{pt_benehmen}** * 3  
+            &plus;&ensp;  **{pt_zimmer}** * 1
+            #### =&ensp; {pt_ges}
+            """)
+
+        if st.button('Save detection'):
+            st.session_state.liste.append({"id": 12, "punkte": int(pt_ges)})
+
+
         st.write(detection)
         for idx in df.index:
+            print(idx)
             #for pred in detection["predictions"]:
             x0 = int(df["x"][idx] - (df["w"][idx]/2))
             y0 = int(df["y"][idx] - (df["h"][idx]/2))
@@ -77,3 +110,5 @@ if img_file_buffer is not None:
             rgb_img = cv2.rectangle(rgb_img, (x0, y0), (x1, y1), CLASS_TO_COLOR[df["class"][idx]], 2)
 
         FRAME_WINDOW.image(rgb_img)
+
+st.write(st.session_state.liste)
