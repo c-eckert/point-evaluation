@@ -74,6 +74,6 @@ if img_file_buffer is not None:
             x1 = int(df["x"][idx] + (df["w"][idx]/2))
             y1 = int(df["y"][idx] + (df["h"][idx]/2))
 
-            rgb_img = cv2.rectangle(rgb_img, (x0, y0), (x1, y1), CLASS_TO_COLOR[pred["class"]], 2)
+            rgb_img = cv2.rectangle(rgb_img, (x0, y0), (x1, y1), CLASS_TO_COLOR[df["class"][idx]], 2)
 
         FRAME_WINDOW.image(rgb_img)
