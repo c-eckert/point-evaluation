@@ -45,22 +45,34 @@ if img_file_buffer is not None:
         rgb_img = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2RGB)
         data_x = [i["x"] for i in detection["predictions"]]
         data_y = [i["y"] for i in detection["predictions"]]
-        data_class = [CLASS_TO_VALUE[i["class"]] for i in detection["predictions"]]
-        d = {"y": data_y, "class": data_class}
+        data_w = [i["width"] for i in detection["predictions"]]
+        data_h = [i["height"] for i in detection["predictions"]]
+        data_conf = [i["confidence"] for i in detection["predictions"]]
+        data_class = [i["class"] for i in detection["predictions"]]
+        data_points = [CLASS_TO_VALUE[i["class"]] for i in detection["predictions"]]
+        d = {
+            "x": data_x, 
+            "y": data_y, 
+            "w": data_w, 
+            "h": data_h, 
+            "conf": data_conf, 
+            "class": data_class,
+            "points": data_points
+        }
         df = pd.DataFrame(data=d)
         df = df.sort_values(by=["y"])
         st.write(f"Anzahl Detektionen {df.shape[0]}")
-        punkte_3fach = df["class"].iloc[:-5].sum()
-        punkte_1fach = df["class"].iloc[-5:].sum()
+        punkte_3fach = df["points"].iloc[:-5].sum()
+        punkte_1fach = df["points"].iloc[-5:].sum()
         punkte_ges = punkte_3fach*3 + punkte_1fach
         st.write(f"Punktzahl: {punkte_ges}")
-        
         st.write(detection)
-        for pred in detection["predictions"]:
-            x0 = int(pred["x"] - (pred["width"]/2))
-            y0 = int(pred["y"] - (pred["height"]/2))
-            x1 = int(pred["x"] + (pred["width"]/2))
-            y1 = int(pred["y"] + (pred["height"]/2))
+        for pred in df:
+            #for pred in detection["predictions"]:
+            x0 = int(pred["x"] - (pred["w"]/2))
+            y0 = int(pred["y"] - (pred["h"]/2))
+            x1 = int(pred["x"] + (pred["w"]/2))
+            y1 = int(pred["y"] + (pred["h"]/2))
 
             rgb_img = cv2.rectangle(rgb_img, (x0, y0), (x1, y1), CLASS_TO_COLOR[pred["class"]], 2)
 
