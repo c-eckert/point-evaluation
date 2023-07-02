@@ -103,6 +103,16 @@ if img_file_buffer is not None:
             &plus;&ensp;  **{pt_sums["Zimmer"]}** * 1
             #### =&ensp; {pt_ges}
             """)
+        
+        st.markdown(f"""
+            | Kategorie    | Punkte   |
+            |--------------|------------|
+            | Vers         | &emsp; **{pt_sums["Vers"]}** * 3 |
+            | Mitarbeit    | &plus;&ensp; **{pt_sums["Mitarbeit"]}** * 3 |
+            | Benehmen     | &plus;&ensp;  **{pt_sums["Benehmen"]}** * 3 |
+            | Zimmer       | &plus;&ensp;  **{pt_sums["Zimmer"]}** * 1 |
+            | **Gesamtpunkte** | =&ensp; **{pt_ges}** |
+            """)
 
         #st.write(detection)
 
