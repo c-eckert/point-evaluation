@@ -67,12 +67,12 @@ if img_file_buffer is not None:
         punkte_ges = punkte_3fach*3 + punkte_1fach
         st.write(f"Punktzahl: {punkte_ges}")
         st.write(detection)
-        for pred in df:
+        for idx in df.index:
             #for pred in detection["predictions"]:
-            x0 = int(pred["x"] - (pred["w"]/2))
-            y0 = int(pred["y"] - (pred["h"]/2))
-            x1 = int(pred["x"] + (pred["w"]/2))
-            y1 = int(pred["y"] + (pred["h"]/2))
+            x0 = int(df["x"][idx] - (df["w"][idx]/2))
+            y0 = int(df["y"][idx] - (df["h"][idx]/2))
+            x1 = int(df["x"][idx] + (df["w"][idx]/2))
+            y1 = int(df["y"][idx] + (df["h"][idx]/2))
 
             rgb_img = cv2.rectangle(rgb_img, (x0, y0), (x1, y1), CLASS_TO_COLOR[pred["class"]], 2)
 
