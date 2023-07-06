@@ -198,8 +198,6 @@ if st.button('add'):
 
 if st.button('update'):
     df_all = pd.read_csv('data.csv')
-    #df_all = df_all.append(st.session_state.liste, ignore_index=True)
-    #df_all.to_csv('data.csv', index=False)
-    st.write(df_all)
+    st.session_state.liste = df_all.to_dict('records')
 
 st.table(st.session_state.liste)
