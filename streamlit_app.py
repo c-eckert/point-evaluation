@@ -192,4 +192,15 @@ with but_col4:
         mime='text/csv',
     )
 
+if st.button('add'):
+    df_all = pd.DataFrame()
+    df_all = df_all.append(st.session_state.liste, ignore_index=True)
+    df_all.to_csv('data.csv', index=False)
+
+if st.button('update'):
+    df_all = pd.read_csv('data.csv')
+    df_all = df_all.append(st.session_state.liste, ignore_index=True)
+    df_all.to_csv('data.csv', index=False)
+    st.write(df_all)
+
 st.table(st.session_state.liste)
