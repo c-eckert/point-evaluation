@@ -192,6 +192,8 @@ with but_col4:
         mime='text/csv',
     )
 
+st.write("Global list")
+
 if st.button('add'):
     df_all = pd.DataFrame(st.session_state.liste)
     df_all.to_csv('data.csv', index=False)
