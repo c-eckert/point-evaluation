@@ -106,7 +106,6 @@ def generate_csv_from_list(dictionary):
 
 def initialize_global_csv():
     df = pd.DataFrame(columns=['Punkte'], index=range(200))
-    st.session_state.dataframe = df
     df.to_csv('data.csv')
 
 
@@ -114,9 +113,6 @@ def initialize_global_csv():
 
 if 'liste' not in st.session_state:
     st.session_state.liste = []
-
-if 'dataframe' not in st.session_state:
-    initialize_global_csv()
 
 
 # WEBSITE
@@ -209,14 +205,13 @@ st.write("---")
 st.header("Shared list")
 
 if st.button('commit list'):
-    st.session_state.dataframe = pd.read_csv('data.csv', index_col=0)
+    df = pd.read_csv('data.csv', index_col=0)
 
     for i in st.session_state.liste:
-        st.session_state.dataframe['Punkte'][i['id']]=i['punkte']
-    st.session_state.dataframe.to_csv('data.csv')
+        df['Punkte'][i['id']]=i['punkte']
+    df.to_csv('data.csv')
 
 if st.button('clear list'):
     initialize_global_csv()
 
-st.session_state.dataframe = pd.read_csv('data.csv', index_col=0)
-st.write(st.session_state.dataframe)
+st.write(pd.read_csv('data.csv', index_col=0))
