@@ -10,9 +10,6 @@ from datetime import datetime
 ROBOFLOW_MODEL = st.secrets["RF_MODEL"]
 ROBOFLOW_API_KEY = st.secrets["RF_API_KEY"]
 
-if 'liste' not in st.session_state:
-    st.session_state.liste = []
-
 CLASS_TO_COLOR = {
     "red-dot": (255, 0, 0),
     "yellow-dot": (255, 255, 0),
@@ -106,6 +103,22 @@ def generate_csv_from_list(dictionary):
     df = pd.DataFrame(dictionary)
     return df.to_csv().encode('utf-8')
 
+
+def initialize_global_csv():
+    df = pd.DataFrame(columns=['Punkte'], index=range(200))
+    st.session_state.dataframe = df
+    df.to_csv('data.csv')
+
+
+# SESSION STATES
+
+if 'liste' not in st.session_state:
+    st.session_state.liste = []
+
+if 'dataframe' not in st.session_state:
+    initialize_global_csv()
+
+
 # WEBSITE
 
 img_file_buffer = st.camera_input("Take a picture", key="camera")
@@ -159,9 +172,6 @@ if img_file_buffer is not None:
                 """)
 
 
-
-
-
 st.write("---") 
 input_col1, input_col2 = st.columns(2)
 with input_col1:
@@ -172,8 +182,9 @@ with input_col2:
 
 but_col1, but_col2, but_col3, but_col4 = st.columns(4)
 with but_col1:
-    if st.button('Add detection to list'):
+    if st.button('Add detection'):
         st.session_state.liste.append({"id": id_number, "punkte": pkte_number})
+        st.success('Detektion hinzugefügt')
 
 with but_col2:
     if st.button('Delete last entry'):
@@ -186,20 +197,26 @@ with but_col3:
 csv = generate_csv_from_list(st.session_state.liste)
 with but_col4:
     st.download_button(
-        label="Download data as CSV",
+        label="Export CSV",
         data=csv,
         file_name=f'punkte_{datetime.now().strftime("%Y%m%d-%H%M%S")}.csv',
         mime='text/csv',
     )
-
-st.write("Global list")
-
-if st.button('add'):
-    df_all = pd.DataFrame(st.session_state.liste)
-    df_all.to_csv('data.csv', index=False)
-
-if st.button('update'):
-    df_all = pd.read_csv('data.csv')
-    st.session_state.liste = df_all.to_dict('records')
-
 st.table(st.session_state.liste)
+
+st.write("---") 
+
+st.header("Shared list")
+
+if st.button('commit list'):
+    st.session_state.dataframe = pd.read_csv('data.csv', index_col=0)
+
+    for i in st.session_state.liste:
+        st.session_state.dataframe['Punkte'][i['id']]=i['punkte']
+    st.session_state.dataframe.to_csv('data.csv')
+
+if st.button('clear list'):
+    initialize_global_csv()
+
+st.session_state.dataframe = pd.read_csv('data.csv', index_col=0)
+st.write(st.session_state.dataframe)
