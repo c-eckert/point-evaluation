@@ -30,7 +30,7 @@ ROW_NAMES = [
 ]
 
 # FUNCTIONS
-@st.cache
+@st.cache_data
 def detect_aruco_marker(img):
     id = 0
     aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_4X4_250)
@@ -45,7 +45,7 @@ def detect_aruco_marker(img):
             id = ids[0][0]
     return id
 
-@st.cache
+@st.cache_data
 def detect_points(img):
     retval, buffer = cv2.imencode('.jpg', img)
     img_str = base64.b64encode(buffer)
@@ -70,7 +70,7 @@ def detect_points(img):
         }
         return d
 
-@st.cache
+@st.cache_data
 def draw_rows(df, img):
     pt_sums = dict.fromkeys(ROW_NAMES, 0)
     for i, row_name in enumerate(ROW_NAMES):
@@ -88,7 +88,7 @@ def draw_rows(df, img):
             cv2.putText(img, row_name, (max_x + 5, max_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
     return pt_sums
 
-@st.cache
+@st.cache_data
 def draw_points(img):
     for idx in df.index:
         x0 = int(df["x"][idx] - (df["w"][idx]/2))
@@ -98,13 +98,17 @@ def draw_points(img):
         cv2.rectangle(img, (x0, y0), (x1, y1), CLASS_TO_COLOR[df["class"][idx]], 2)
         cv2.putText(img, f"{int(df['conf'][idx]*100)}%", (x0 + 1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
 
-@st.cache
+@st.cache_data
 def generate_csv_from_list(dictionary):
     # IMPORTANT: Cache the conversion to prevent computation on every rerun
     df = pd.DataFrame(dictionary)
     return df.to_csv().encode('utf-8')
 
+@st.cache_data
+def generate_csv_from_df(df):
+    return df.to_csv().encode('utf-8')
 
+@st.cache_data
 def initialize_global_csv():
     df = pd.DataFrame(columns=['Punkte'], index=range(200))
     df.to_csv('data.csv')
@@ -121,7 +125,9 @@ if 'password' not in st.session_state:
 
 # WEBSITE
 
-img_file_buffer = st.camera_input("Take a picture", key="camera")
+st.header("Auswertung")
+
+img_file_buffer = st.camera_input("Hier die Bewertungskarte fotografieren", key="camera")
 
 FRAME_WINDOW = st.image([])
 
@@ -179,48 +185,64 @@ with input_col1:
 with input_col2:
     pkte_number = st.number_input('Punktzahl', min_value=0, value=pt_ges, step=1)
 
-st.header("Your list")
+st.header("Deine Liste")
 
+mylist_col1, mylist_col2 = st.columns(2)
+with mylist_col1:
+    if st.button('Punkte hinzufügen'):
+        st.session_state.liste.append({"id": id_number, "punkte": pkte_number})
+        st.success('Punkte hinzugefügt')
+    
+    if st.button('Letzten Eintrag löschen'):
+        if len(st.session_state.liste) > 0:
+            st.session_state.liste.pop()
 
-if st.button('Add detection'):
-    st.session_state.liste.append({"id": id_number, "punkte": pkte_number})
-    st.success('Detektion hinzugefügt')
+    if st.button('Alle Einträge löschen'):
+        st.session_state.liste = []
 
-if st.button('Delete last entry'):
-    st.session_state.liste.pop()
+    st.download_button(
+        label="Exportieren als CSV",
+        key="export my list to csv",
+        data=generate_csv_from_list(st.session_state.liste),
+        file_name=f'punkte_{datetime.now().strftime("%Y%m%d-%H%M%S")}.csv',
+        mime='text/csv',
+    )
 
-st.table(st.session_state.liste)
-
-if st.button('Clear all detections'):
-    st.session_state.liste = []
-
-csv = generate_csv_from_list(st.session_state.liste)
-
-st.download_button(
-    label="Export CSV",
-    data=csv,
-    file_name=f'punkte_{datetime.now().strftime("%Y%m%d-%H%M%S")}.csv',
-    mime='text/csv',
-)
+with mylist_col2:
+    st.table(st.session_state.liste)
 
 
 st.write("---") 
 
-st.header("Shared list")
+st.header("Gemeinsame Liste")
 
-st.session_state.password = st.text_input("Enter a password", type="password")
-
+st.session_state.password = st.text_input("Password eingeben", type="password")
+button_disabled = True
 if st.session_state.password == PASSWORD:
     st.success('Password korrekt')
-    if st.button('commit list'):
+    button_disabled = False
+else:
+    st.info('Password eingeben, um gemeinsame Liste zu bearbeiten')
+
+sharedlist_col1, sharedlist_col2 = st.columns(2)
+
+with sharedlist_col1:
+    if st.button('Listen zusammenführen', disabled=button_disabled):
         df = pd.read_csv('data.csv', index_col=0)
         for i in st.session_state.liste:
             df['Punkte'][i['id']]=i['punkte']
         df.to_csv('data.csv')
 
-    if st.button('clear list'):
+    if st.button('Gemeinsame Liste zurücksetzen', disabled=button_disabled):
         initialize_global_csv()
-else:
-    st.info('Password eingeben, um auf geteilte Liste zuzugreifen')
 
-st.write(pd.read_csv('data.csv', index_col=0))
+    st.download_button(
+        label="Exportieren als CSV",
+        key="export shared list to csv",
+        data=generate_csv_from_df(pd.read_csv('data.csv', index_col=0)),
+        file_name=f'gemeinsame_punktliste_{datetime.now().strftime("%Y%m%d-%H%M%S")}.csv',
+        mime='text/csv',
+    )
+
+with sharedlist_col2:
+    st.write(pd.read_csv('data.csv', index_col=0))
