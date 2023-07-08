@@ -9,6 +9,7 @@ from datetime import datetime
 
 ROBOFLOW_MODEL = st.secrets["RF_MODEL"]
 ROBOFLOW_API_KEY = st.secrets["RF_API_KEY"]
+PASSWORD = st.secrets["PASSWORD"]
 
 CLASS_TO_COLOR = {
     "red-dot": (255, 0, 0),
@@ -114,6 +115,9 @@ def initialize_global_csv():
 if 'liste' not in st.session_state:
     st.session_state.liste = []
 
+if 'password' not in st.session_state:
+    st.session_state.password = ""
+
 
 # WEBSITE
 
@@ -175,43 +179,48 @@ with input_col1:
 with input_col2:
     pkte_number = st.number_input('Punktzahl', min_value=0, value=pt_ges, step=1)
 
+st.header("Your list")
 
-but_col1, but_col2, but_col3, but_col4 = st.columns(4)
-with but_col1:
-    if st.button('Add detection'):
-        st.session_state.liste.append({"id": id_number, "punkte": pkte_number})
-        st.success('Detektion hinzugefügt')
 
-with but_col2:
-    if st.button('Delete last entry'):
-        st.session_state.liste.pop()
+if st.button('Add detection'):
+    st.session_state.liste.append({"id": id_number, "punkte": pkte_number})
+    st.success('Detektion hinzugefügt')
 
-with but_col3:
-    if st.button('Clear all detections'):
-        st.session_state.liste = []
+if st.button('Delete last entry'):
+    st.session_state.liste.pop()
+
+st.table(st.session_state.liste)
+
+if st.button('Clear all detections'):
+    st.session_state.liste = []
 
 csv = generate_csv_from_list(st.session_state.liste)
-with but_col4:
-    st.download_button(
-        label="Export CSV",
-        data=csv,
-        file_name=f'punkte_{datetime.now().strftime("%Y%m%d-%H%M%S")}.csv',
-        mime='text/csv',
-    )
-st.table(st.session_state.liste)
+
+st.download_button(
+    label="Export CSV",
+    data=csv,
+    file_name=f'punkte_{datetime.now().strftime("%Y%m%d-%H%M%S")}.csv',
+    mime='text/csv',
+)
+
 
 st.write("---") 
 
 st.header("Shared list")
 
-if st.button('commit list'):
-    df = pd.read_csv('data.csv', index_col=0)
+st.session_state.password = st.text_input("Enter a password", type="password")
 
-    for i in st.session_state.liste:
-        df['Punkte'][i['id']]=i['punkte']
-    df.to_csv('data.csv')
+if st.session_state.password == PASSWORD:
+    st.success('Password korrekt')
+    if st.button('commit list'):
+        df = pd.read_csv('data.csv', index_col=0)
+        for i in st.session_state.liste:
+            df['Punkte'][i['id']]=i['punkte']
+        df.to_csv('data.csv')
 
-if st.button('clear list'):
-    initialize_global_csv()
+    if st.button('clear list'):
+        initialize_global_csv()
+else:
+    st.info('Password eingeben, um auf geteilte Liste zuzugreifen')
 
 st.write(pd.read_csv('data.csv', index_col=0))
