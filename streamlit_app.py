@@ -206,7 +206,7 @@ with mylist_col1:
         if len(st.session_state.liste) > 0:
             st.session_state.liste.pop()
 
-    if st.button('🗑️ alles löschen', key="reset shared list"):
+    if st.button('🗑️ alles löschen', key="reset my list"):
         st.session_state.liste = []
 
     st.download_button(
