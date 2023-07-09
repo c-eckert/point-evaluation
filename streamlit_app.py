@@ -198,19 +198,19 @@ st.header("Deine Liste")
 
 mylist_col1, mylist_col2 = st.columns(2)
 with mylist_col1:
-    if st.button('Punkte hinzufügen'):
+    if st.button('➕'):
         st.session_state.liste.append({"id": id_number, "punkte": pkte_number})
         st.success('Punkte hinzugefügt')
     
-    if st.button('Letzten Eintrag löschen'):
+    if st.button('➖'):
         if len(st.session_state.liste) > 0:
             st.session_state.liste.pop()
 
-    if st.button('Alle Einträge löschen'):
+    if st.button('🗑️ Alles löschen'):
         st.session_state.liste = []
 
     st.download_button(
-        label="Exportieren als CSV",
+        label="⬇️ Exportieren",
         key="export my list to csv",
         data=generate_csv_from_list(st.session_state.liste),
         file_name=f'punkte_{datetime.now().strftime("%Y%m%d-%H%M%S")}.csv',
@@ -236,17 +236,17 @@ else:
 sharedlist_col1, sharedlist_col2 = st.columns(2)
 
 with sharedlist_col1:
-    if st.button('Listen zusammenführen', disabled=button_disabled):
+    if st.button('🔀 Zusammenführen', disabled=button_disabled):
         df = pd.read_csv('data.csv', index_col=0)
         for i in st.session_state.liste:
             df['Punkte'][i['id']]=i['punkte']
         df.to_csv('data.csv')
 
-    if st.button('Gemeinsame Liste zurücksetzen', disabled=button_disabled):
+    if st.button('🗑️ Gemeinsame Liste löschen', disabled=button_disabled):
         initialize_global_csv()
 
     st.download_button(
-        label="Exportieren als CSV",
+        label="⬇️ Exportieren",
         key="export shared list to csv",
         data=generate_csv_from_df(pd.read_csv('data.csv', index_col=0)),
         file_name=f'gemeinsame_punktliste_{datetime.now().strftime("%Y%m%d-%H%M%S")}.csv',
