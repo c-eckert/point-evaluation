@@ -6,6 +6,7 @@ import requests
 import base64
 import pandas as pd
 from datetime import datetime
+import os
 
 ROBOFLOW_MODEL = st.secrets["RF_MODEL"]
 ROBOFLOW_API_KEY = st.secrets["RF_API_KEY"]
@@ -30,7 +31,6 @@ ROW_NAMES = [
 ]
 
 st.write('''<style>
-
 [data-testid="column"] {
     width: calc(33.3333% - 1rem) !important;
     flex: 1 1 calc(33.3333% - 1rem) !important;
@@ -131,9 +131,12 @@ if 'liste' not in st.session_state:
 if 'password' not in st.session_state:
     st.session_state.password = ""
 
+file_path = 'data.csv'  # Replace with the actual file path
+
+if not os.path.isfile(file_path):
+    initialize_global_csv()
 
 # WEBSITE
-
 st.header("Auswertung")
 
 img_file_buffer = st.camera_input("Hier die Bewertungskarte fotografieren", key="camera")
