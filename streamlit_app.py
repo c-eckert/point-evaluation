@@ -36,11 +36,6 @@ st.write('''<style>
     flex: 1 1 calc(33.3333% - 1rem) !important;
     min-width: calc(33% - 1rem) !important;
 }
-</style>
-<style>
-[data-testid="button"] {
-    min-width: calc(25% - 1rem) !important;
-}
 </style>''', unsafe_allow_html=True)
 
 # FUNCTIONS
@@ -211,7 +206,7 @@ with mylist_col1:
         if len(st.session_state.liste) > 0:
             st.session_state.liste.pop()
 
-    if st.button('🗑️ Liste löschen', key="reset shared list"):
+    if st.button('🗑️ alles löschen', key="reset shared list"):
         st.session_state.liste = []
 
     st.download_button(
