@@ -2,6 +2,7 @@ import streamlit as st
 import cv2
 import cv2.aruco as aruco
 import numpy as np
+from sklearn.cluster import KMeans
 import requests
 import base64
 import pandas as pd
@@ -80,21 +81,43 @@ def detect_points(img):
         return d
 
 @st.cache_data
-def draw_rows(df, img):
-    pt_sums = dict.fromkeys(ROW_NAMES, 0)
-    for i, row_name in enumerate(ROW_NAMES):
-        df_row = df.iloc[i*5:(i+1)*5]
-        if not df_row.empty:
-            points = int(df_row["points"].sum())
-            pt_sums[row_name] = points
-            
-            min_x = int(df_row["x"].min() - df_row["w"].min()/2)
-            min_y = int(df_row["y"].min() - df_row["h"].min()/2)
-            max_x = int(df_row["x"].max() + df_row["w"].min()/2)
-            max_y = int(df_row["y"].max() + df_row["h"].min()/2)
+def draw_rows(df, img, rows):
+    pt_sums = dict.fromkeys(rows, 0)
+    
+    print(df["y"].values.reshape(-1, 1))
+    y_coordinates = df['y'].values.reshape(-1, 1)
 
-            cv2.rectangle(img, (min_x, min_y), (max_x, max_y), (0, 0, 255), 2)
-            cv2.putText(img, row_name, (max_x + 5, max_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+    # Initialisierung des KMeans-Modells
+    kmeans = KMeans(n_clusters=len(rows))
+
+    # Führen Sie den K-Means-Algorithmus auf den Daten aus
+    kmeans.fit(y_coordinates)
+
+    # Die Schwerpunkte der Cluster
+    cluster_centers = kmeans.cluster_centers_
+
+    # Sortieren der Cluster-Center und Ermitteln der Reihenfolge
+    order = cluster_centers.argsort(axis=0).flatten()
+    rank = order.argsort()
+
+    # Die Zuordnung der Datenpunkte zu den Clustern basierend auf der Reihenfolge der Cluster-Center
+    cluster_labels = rank[kmeans.labels_]
+
+    # Fügen Sie die Cluster-Zuordnung dem ursprünglichen DataFrame hinzu
+    df['cluster'] = cluster_labels
+    
+    for i, row_name in enumerate(rows):
+        df_row = df[df['cluster'] == i]
+        points = int(df_row["points"].sum())
+        pt_sums[row_name] = points
+        
+        min_x = int(df_row["x"].min() - df_row["w"].min()/2)
+        min_y = int(df_row["y"].min() - df_row["h"].min()/2)
+        max_x = int(df_row["x"].max() + df_row["w"].min()/2)
+        max_y = int(df_row["y"].max() + df_row["h"].min()/2)
+
+        cv2.rectangle(img, (min_x, min_y), (max_x, max_y), (0, 0, 255), 2)
+        cv2.putText(img, row_name, (max_x + 5, max_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
     return pt_sums
 
 @st.cache_data
@@ -139,6 +162,8 @@ if not os.path.isfile(file_path):
 # WEBSITE
 st.header("Auswertung")
 
+tab_gesamtbewertung, tab_verserally = st.tabs(["Gesamtbewertung", "Verserally"])
+
 img_file_buffer = st.camera_input("Hier die Bewertungskarte fotografieren", key="camera")
 
 FRAME_WINDOW = st.image([])
@@ -146,7 +171,7 @@ FRAME_WINDOW = st.image([])
 id = 0
 pt_ges = 0
 
-if img_file_buffer is not None:
+if img_file_buffer:
     # To read image file buffer with OpenCV:
     bytes_data = img_file_buffer.getvalue()
     cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
@@ -159,9 +184,8 @@ if img_file_buffer is not None:
     d = detect_points(cv2_img)
     if d:
         df = pd.DataFrame(data=d)
-        df = df.sort_values(by=["y"])
 
-        pt_sums = draw_rows(df, rgb_img) # Reihenerkennung
+        pt_sums = draw_rows(df, rgb_img, ROW_NAMES) # Reihenerkennung
         draw_points(rgb_img) # Punkteerkennung
         FRAME_WINDOW.image(rgb_img)
         
@@ -190,7 +214,7 @@ if img_file_buffer is not None:
                 """)
 
 
-st.write("---") 
+#st.write("---")
 input_col1, input_col2 = st.columns(2)
 with input_col1:
     id_number = st.number_input('ID der Person', min_value=0, value=id, step=1)
