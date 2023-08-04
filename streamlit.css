@@ -1,0 +1,17 @@
+[data-testid="column"] {
+    width: calc(20%) !important;
+    flex: 1 1 calc(20%) !important;
+    min-width: calc(20%) !important;
+}
+
+div.stButton button {
+    width: 100%;
+}
+
+div.stDownloadButton button {
+    width: 100%;
+}
+
+div.stDataFrame {
+    width: 100%;
+}
