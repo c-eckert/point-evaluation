@@ -201,7 +201,8 @@ def gemeinsame_liste(meine_liste, meine_spalte):
     sharedlist_col1, sharedlist_col2 = st.columns(2)
     with sharedlist_col1:
         if st.button('🗑️ Liste löschen', key="reset shared list", disabled=st.session_state.button_disabled):
-            initialize_global_csv()        
+            initialize_global_csv()
+            st.experimental_rerun()
 
     with sharedlist_col2:
         st.download_button(
