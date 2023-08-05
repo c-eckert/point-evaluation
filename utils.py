@@ -128,13 +128,13 @@ def draw_points(img, df):
 
 
 
-@st.cashe_data
+@st.cache_data
 def generate_csv_from_list(dictionary):
     # IMPORTANT: Cache the conversion to prevent computation on every rerun
     df = pd.DataFrame(dictionary)
     return df.to_csv().encode('utf-8')
 
-@st.cashe_data
+@st.cache_data
 def generate_csv_from_df(df):
     return df.to_csv().encode('utf-8')
 
