@@ -113,7 +113,7 @@ def do_kmeans(df, inertia_th, cluster_list=None):
     rank = order.argsort()
     df['cluster'] = [cluster_list[i] for i in rank[kmeans.labels_]]
 
-    return cluster_list, df
+    return cluster_list, df, kmeans.inertia_
 
 @st.cache_data
 def draw_points(img, df):
@@ -140,7 +140,7 @@ def generate_csv_from_df(df):
 
 
 def initialize_global_csv():
-    df = pd.DataFrame(columns=['Tagespunkte', 'Rallypunkte'], index=range(200))
+    df = pd.DataFrame(columns=['Tagesbewertung', 'Verserally'], index=range(200))
     df.to_csv('data.csv')
 
 def deine_liste(id, punkte, liste):
@@ -179,7 +179,7 @@ def deine_liste(id, punkte, liste):
             mime='text/csv',
         )
 
-def gemeinsame_liste(meine_liste, meine_spalte):
+def gemeinsame_liste(meine_liste):
     st.header("Gemeinsame Liste")
 
     st.session_state.password = st.text_input("Password eingeben", type="password")
@@ -193,10 +193,10 @@ def gemeinsame_liste(meine_liste, meine_spalte):
     if st.button('🔀 Meine und gemeinsame Liste zusammenführen', disabled=st.session_state.button_disabled):
         df = pd.read_csv('data.csv', index_col=0)
         for i in st.session_state[meine_liste]:
-            df[meine_spalte][i['id']]=i['punkte']
+            df[meine_liste][i['id']]=i['punkte']
         df.to_csv('data.csv')
 
-    st.write(pd.read_csv('data.csv', index_col=0))
+    st.dataframe(pd.read_csv('data.csv', index_col=0), use_container_width=True)
 
     sharedlist_col1, sharedlist_col2 = st.columns(2)
     with sharedlist_col1:
