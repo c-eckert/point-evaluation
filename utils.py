@@ -59,7 +59,7 @@ def detect_draw_aruco_marker(img):
 def detect_points(img):
     retval, buffer = cv2.imencode('.jpg', img)
     img_str = base64.b64encode(buffer)
-    upload_url = f"https://detect.roboflow.com/{ROBOFLOW_MODEL}/1?api_key={ROBOFLOW_API_KEY}"
+    upload_url = f"https://detect.roboflow.com/{ROBOFLOW_MODEL}/2?api_key={ROBOFLOW_API_KEY}"
 
     resp = requests.post(
         upload_url, 
